@@ -22,7 +22,13 @@ async function run() {
   try {
     await client.connect();
 
+    const db = client.db("jobportal");
+    const jobsCollection = db.collection("jobs")
 
+    app.get('/jobs', async(req, res)=>{
+      const jobs = await jobsCollection.find().toArray();
+      res.send(jobs);
+    })
 
 
     await client.db("admin").command({ ping: 1 });
