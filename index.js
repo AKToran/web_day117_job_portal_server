@@ -23,7 +23,8 @@ async function run() {
     await client.connect();
 
     const db = client.db("jobportal");
-    const jobsCollection = db.collection("jobs")
+    const jobsCollection = db.collection("jobs");
+    const applicationCollection = db.collection("applications");
 
     app.get('/jobs', async(req, res)=>{
       const jobs = await jobsCollection.find().toArray();
@@ -35,6 +36,13 @@ async function run() {
       const query = { _id : new ObjectId(id) };
       const job = await jobsCollection.findOne(query);
       res.send(job);
+    })
+
+    //job application related apis
+    app.post('/applications', async(req, res)=>{
+      const application = req.body;
+      const result = await applicationCollection.insertOne(application);
+      res.send(result);
     })
 
 
