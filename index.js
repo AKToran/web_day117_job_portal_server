@@ -50,6 +50,7 @@ async function run() {
     })
 
     //job application related apis
+    //application with email query for workers to see their applications
     app.get('/applications', async(req, res)=>{
       const email = req.query.email;
       const query = { applicant : email };
@@ -57,6 +58,15 @@ async function run() {
       res.send(result); 
     })
     
+    //get all the application on a job for recruiter:
+    app.get('/applications/job/:job_id', async(req, res)=>{
+      const job_id = req.params.job_id;
+      const query = { jobId : job_id};
+      console.log(job_id);
+      const result = await applicationCollection.find(query).toArray();
+      res.send(result);
+    })
+
     app.post('/applications', async(req, res)=>{
       const application = req.body;
       const result = await applicationCollection.insertOne(application);
