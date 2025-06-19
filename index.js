@@ -6,7 +6,10 @@ const app = express();
 const port = process.env.PORT || 3000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
-app.use(cors());
+app.use(cors({
+  origin:['http://localhost:5173'],
+  credentials: true
+}));
 app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.db_user}:${process.env.db_password}@cluster0.cjjjauk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -31,7 +34,7 @@ async function run() {
     app.post('/jwt', async(req, res)=>{
       const { email } = req.body;
       const user = { email }
-      const token = jwt.sign(user, 'secret', {expiresIn: '1h'});
+      const token = jwt.sign(user, process.env.JWT_ACCESS_SECRET, {expiresIn: '1h'});
       res.send({token});
     })
 
