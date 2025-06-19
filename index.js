@@ -35,7 +35,14 @@ async function run() {
       const { email } = req.body;
       const user = { email }
       const token = jwt.sign(user, process.env.JWT_ACCESS_SECRET, {expiresIn: '1h'});
-      res.send({token});
+
+      //set the cookies:
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: false
+      })
+
+      res.send({ success: true });
     })
 
 
