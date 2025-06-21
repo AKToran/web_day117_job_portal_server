@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 const app = express();
 const port = process.env.PORT || 3000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -11,6 +12,23 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+app.use(cookieParser());
+
+//making middleware:
+const logger = (req, res, next)=>{
+  console.log('inside the logger middleware,');
+  next(); //without this it doesn't go to next step
+}
+
+const verifyToken = (req, res, next) =>{
+  const token = req?.cookies?.token;
+  console.log('cookie in the verify middleware:', token);
+  
+
+
+  next();
+}
+
 
 const uri = `mongodb+srv://${process.env.db_user}:${process.env.db_password}@cluster0.cjjjauk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
@@ -72,7 +90,8 @@ async function run() {
 
     //job application related apis
     //application with email query for workers to see their applications
-    app.get('/applications', async(req, res)=>{
+    app.get('/applications', logger, verifyToken, async(req, res)=>{
+      // console.log("cookie inside api:", req.cookies);
       const email = req.query.email;
       const query = { applicant : email };
       const result = await applicationCollection.find(query).toArray();
