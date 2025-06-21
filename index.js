@@ -16,17 +16,27 @@ app.use(cookieParser());
 
 //making middleware:
 const logger = (req, res, next)=>{
-  console.log('inside the logger middleware,');
+  // console.log('inside the logger middleware,');
   next(); //without this it doesn't go to next step
 }
 
 const verifyToken = (req, res, next) =>{
   const token = req?.cookies?.token;
-  console.log('cookie in the verify middleware:', token);
+  // console.log('cookie in the verify middleware:', token);
   
+  if(!token){
+    return res.status(401).send({ message: "unauthorized access, token not provided"})
+  }
 
-
-  next();
+  jwt.verify(token, process.env.JWT_ACCESS_SECRET, (err, decoded)=>{
+    if(err){
+      return res.status(401).send({message: "unauthorized access!"});
+    }
+    //set the decoded value to the req object to check decoded user from token and api user.
+    req.decoded = decoded;
+    // console.log(decoded);
+    next();
+  })
 }
 
 
@@ -89,10 +99,15 @@ async function run() {
     })
 
     //job application related apis
-    //application with email query for workers to see their applications
+    //!application with email query for workers to see their applications
     app.get('/applications', logger, verifyToken, async(req, res)=>{
       // console.log("cookie inside api:", req.cookies);
       const email = req.query.email;
+
+      if(email !== req.decoded.email){
+        return res.status(403).send({message: "Forbidden access!"})
+      }
+
       const query = { applicant : email };
       const result = await applicationCollection.find(query).toArray();
       res.send(result); 
