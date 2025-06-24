@@ -20,9 +20,27 @@ const logger = (req, res, next)=>{
   next(); //without this it doesn't go to next step
 }
 
+// const verifyToken = (req, res, next) =>{
+//   const token = req?.cookies?.token;
+//   // console.log('cookie in the verify middleware:', token);
+  
+//   if(!token){
+//     return res.status(401).send({ message: "unauthorized access, token not provided"})
+//   }
+
+//   jwt.verify(token, process.env.JWT_ACCESS_SECRET, (err, decoded)=>{
+//     if(err){
+//       return res.status(401).send({message: "unauthorized access!"});
+//     }
+//     //set the decoded value to the req object to check decoded user from token and api user.
+//     req.decoded = decoded;
+//     // console.log(decoded);
+//     next();
+//   })
+// }
+
 const verifyToken = (req, res, next) =>{
   const token = req?.cookies?.token;
-  // console.log('cookie in the verify middleware:', token);
   
   if(!token){
     return res.status(401).send({ message: "unauthorized access, token not provided"})
@@ -32,12 +50,11 @@ const verifyToken = (req, res, next) =>{
     if(err){
       return res.status(401).send({message: "unauthorized access!"});
     }
-    //set the decoded value to the req object to check decoded user from token and api user.
     req.decoded = decoded;
-    // console.log(decoded);
     next();
   })
 }
+
 
 
 const uri = `mongodb+srv://${process.env.db_user}:${process.env.db_password}@cluster0.cjjjauk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
