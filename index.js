@@ -14,6 +14,16 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+var admin = require("firebase-admin");
+
+var serviceAccount = require("./firebase-admin-key.json");
+
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+
 //making middleware:
 const logger = (req, res, next)=>{
   // console.log('inside the logger middleware,');
@@ -56,7 +66,7 @@ const verifyToken = (req, res, next) =>{
 }
 
 //verify firebase token
-const verifyFirebaseToken = (req, res, next) =>{
+const verifyFirebaseToken = async(req, res, next) =>{
   const header = req.headers?.authorization;
   const token = header.split(' ')[1];
   // console.log('firebase token', token);
@@ -64,8 +74,10 @@ const verifyFirebaseToken = (req, res, next) =>{
   if(!token){
     return res.status(401).send({ message: "unauthorized access, token not provided"})
   }
-  
 
+  const userInfo = await admin.auth().verifyIdToken(token);
+  // console.log(userInfo);
+  req.tokenEmail = userInfo.email;
 
   next();
 }
@@ -134,6 +146,15 @@ async function run() {
     app.get('/applications', logger, verifyToken, verifyFirebaseToken, async(req, res)=>{
       // console.log("cookie inside api:", req.cookies);
       const email = req.query.email;
+
+      //firebase
+      const firebaseEmail = req.tokenEmail
+      if(firebaseEmail !== email){
+        return res.status(403).send({message: "Forbidden access!"});
+      }
+
+
+      //jwt 
 
       if(email !== req.decoded.email){
         return res.status(403).send({message: "Forbidden access!"})
