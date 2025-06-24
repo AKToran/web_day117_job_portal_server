@@ -55,6 +55,20 @@ const verifyToken = (req, res, next) =>{
   })
 }
 
+//verify firebase token
+const verifyFirebaseToken = (req, res, next) =>{
+  const header = req.headers?.authorization;
+  const token = header.split(' ')[1];
+  // console.log('firebase token', token);
+
+  if(!token){
+    return res.status(401).send({ message: "unauthorized access, token not provided"})
+  }
+  
+
+
+  next();
+}
 
 
 const uri = `mongodb+srv://${process.env.db_user}:${process.env.db_password}@cluster0.cjjjauk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -117,7 +131,7 @@ async function run() {
 
     //job application related apis
     //!application with email query for workers to see their applications
-    app.get('/applications', logger, verifyToken, async(req, res)=>{
+    app.get('/applications', logger, verifyToken, verifyFirebaseToken, async(req, res)=>{
       // console.log("cookie inside api:", req.cookies);
       const email = req.query.email;
 
